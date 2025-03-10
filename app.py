@@ -50,7 +50,10 @@ def speak():
     cleanup_old_files()  # Xóa file âm thanh cũ trước khi tạo file mới
 
     text_to_speak = request.form.get('text_to_speak', "")
+    print(f"Văn bản cần phát âm: {text_to_speak}")  # Ghi log văn bản đầu vào
+
     if not text_to_speak:
+        print("Lỗi: Không có nội dung để phát âm.")  # Log lỗi
         return "Không có nội dung để phát âm", 400  # Trả về lỗi nếu nội dung trống
 
     try:
@@ -58,16 +61,19 @@ def speak():
         timestamp = int(time.time())
         file_name = f"speech_{timestamp}.mp3"
         file_path = f"static/{file_name}"
+        print(f"Đường dẫn file âm thanh: {file_path}")  # Ghi log đường dẫn file
 
         # Tạo file âm thanh
         tts = gTTS(text=text_to_speak, lang='en')
         tts.save(file_path)
+        print("Tạo file âm thanh thành công.")  # Log thành công
 
         # Trả về đường dẫn file âm thanh
         return jsonify({"file_url": f"/static/{file_name}"})
     except Exception as e:
-        print(f"Lỗi phát âm: {e}")
+        print(f"Lỗi phát âm: {e}")  # Ghi log chi tiết lỗi
         return "Đã xảy ra lỗi trong quá trình phát âm", 500
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # Lấy cổng từ biến môi trường (hoặc mặc định là 5000)

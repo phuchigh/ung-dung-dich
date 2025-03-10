@@ -47,34 +47,31 @@ def home():
 
 @app.route('/speak', methods=['POST'])
 def speak():
-    cleanup_old_files()  # Xóa file âm thanh cũ trước khi tạo file mới
-
-    text_to_speak = request.form.get('text_to_speak', "")
-    print(f"Văn bản cần phát âm: {text_to_speak}")  # Ghi log văn bản đầu vào
-
-    if not text_to_speak:
-        print("Lỗi: Không có nội dung để phát âm.")  # Log lỗi
-        return "Không có nội dung để phát âm", 400  # Trả về lỗi nếu nội dung trống
-
     try:
-        # Tạo tên file duy nhất dựa trên thời gian
+        cleanup_old_files()  # Xóa file âm thanh cũ
+        text_to_speak = request.form.get('text_to_speak', "")
+
+        if not text_to_speak:
+            print("Lỗi: Nội dung phát âm không được cung cấp.")
+            return "Không có nội dung để phát âm", 400  # Trả về lỗi nếu không có nội dung
+
+        print(f"Văn bản cần phát âm: {text_to_speak}")
+        
+        # Tạo đường dẫn file âm thanh
         timestamp = int(time.time())
         file_name = f"speech_{timestamp}.mp3"
         file_path = f"static/{file_name}"
-        print(f"Đường dẫn file âm thanh: {file_path}")  # Ghi log đường dẫn file
+        print(f"Đường dẫn file âm thanh: {file_path}")
 
-        # Tạo file âm thanh
+        # Sử dụng gTTS để tạo file âm thanh
         tts = gTTS(text=text_to_speak, lang='en')
         tts.save(file_path)
-        print("Tạo file âm thanh thành công.")  # Log thành công
-
-        # Trả về đường dẫn file âm thanh
+        print("Tạo file âm thanh thành công.")
         return jsonify({"file_url": f"/static/{file_name}"})
     except Exception as e:
-        print(f"Lỗi phát âm: {e}")  # Ghi log chi tiết lỗi
+        print(f"Lỗi trong hàm /speak: {e}")  # In chi tiết lỗi
         return "Đã xảy ra lỗi trong quá trình phát âm", 500
-
-
+    
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # Lấy cổng từ biến môi trường (hoặc mặc định là 5000)
     app.run(host='0.0.0.0', port=port)
